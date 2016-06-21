@@ -28,6 +28,14 @@ apply.rule<-function(data,rule)
       results <- data[[rule$field1]] < data[[rule$field2]]
   }
 
+
+  if("rule" %in% names(rule))
+  {
+    element<-strsplit(rule$rule," ")[[1]]
+    new.rule<-list(field1=element[1],field2=element[3],relation=element[2])
+    apply.rule(data,new.rule)
+  }
+
   if (!all(results))
     warning("Rows: ", which(!results)[1], " fail rule: ", rule)
 }
