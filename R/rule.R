@@ -17,6 +17,7 @@ rule.validation <- function( data, rules.file = NULL, rules = NULL )
       apply.rule(data,rule)
   }
 
+  return(TRUE)
 }
 
 relations <- list(
