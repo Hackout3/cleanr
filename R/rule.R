@@ -3,11 +3,13 @@
 #' Throws an error if the data does not confirm to the rule set
 #'
 #' @param data The data to validate
-#' @param rule.file The yaml file containing the rules
+#' @param rules List of rules
+#' @param rule.file Optional: the yaml file containing the rules
 #' @export
-rule.validation <- function( data, rules.file )
+rule.validation <- function( data, rules.file = NULL, rules = NULL )
 {
-  rules<-yaml::yaml.load_file(rules.file)
+  if (is.null(rules))
+    rules<-yaml::yaml.load_file(rules.file)
 
   for(rule in rules)
   {
@@ -17,15 +19,24 @@ rule.validation <- function( data, rules.file )
 
 }
 
+relations <- list(
+  list("keywords" = c("gt", "greater_than", ">"), "func"=function(x,y) x>y),
+  list("keywords" = c("gte", "greater_than_or_equal", ">="), "func"=function(x,y) x>=y),
+  list("keywords" = c("lt", "lesser_than", "<"), "func"=function(x,y) x<y),
+  list("keywords" = c("lte", "lesser_than_or_equal", "<="), "func"=function(x,y) x<=y)
+)
+
 apply.rule<-function(data,rule)
 {
   results <- c()
   if("relation" %in% names(rule))
   {
-    if (rule$relation == "greater_than" || rule$relation == ">")
-      results <- data[[rule$field1]] > data[[rule$field2]]
-    if (rule$relation == "lesser_than" || rule$relation == "<")
-      results <- data[[rule$field1]] < data[[rule$field2]]
+    for( relation in relations )
+      if (rule$relation %in% relation$keywords)
+      {
+        results <- relation$func( data[[rule$field1]], data[[rule$field2]] )
+        break
+      }
   }
 
 
