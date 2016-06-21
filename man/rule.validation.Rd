@@ -6,11 +6,13 @@
 
 Throws an error if the data does not confirm to the rule set}
 \usage{
-rule.validation(data, rules.file)
+rule.validation(data, rules.file = NULL, rules = NULL)
 }
 \arguments{
 \item{data}{The data to validate}
 
-\item{rule.file}{The yaml file containing the rules}
+\item{rules}{List of rules}
+
+\item{rule.file}{Optional: the yaml file containing the rules}
 }
 
