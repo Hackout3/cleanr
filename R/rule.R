@@ -15,7 +15,7 @@ rule_validation <- function( data, rules_file = NULL, rules = NULL )
   for(rule in rules)
   {
     if(is_rule(rule))
-      results <- c(results,apply.rule(data,rule))
+      results <- c(results,apply_rule(data,rule))
   }
 
   return(all(results))
@@ -45,7 +45,7 @@ apply_rule<-function(data,rule)
   {
     element<-strsplit(rule$rule," ")[[1]]
     new.rule<-list(fields=c(element[1],element[3]),relation=element[2])
-    apply.rule(data,new.rule)
+    apply_rule(data,new.rule)
   }
 
   if("invalid" %in% names(rule))
