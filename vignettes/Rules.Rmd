@@ -40,7 +40,7 @@ rule_validation(epi.sim, rules.file="rule.yaml")
 which passes for our data set. In contrast, if we require the date.of.onset to be strictly lesser than, by replacing `lte` with `lt` it will throw a warning and return `FALSE`:
 ```{r,echo=F}
   data(epi.sim)
-  rule.validation(epi.sim, rules=list(list(
+  rule_validation(epi.sim, rules=list(list(
     "fields"=c("date.of.onset", "date.of.hospitalisation"), "relation"="lt" ) ) )
 ```
 
@@ -66,7 +66,7 @@ For example by using the rule.yaml file that contains the following rule:
 
 ```{r,echo=F}
   data(epi.sim)
-  rule.validation(epi.sim, rules=list(list(
+  rule_validation(epi.sim, rules=list(list(
     "fields"=c("date.of.onset", "date.of.hospitalisation"), "relation"="lt" ) ) )
 ```
 
@@ -86,6 +86,6 @@ For example by using the rule.yaml file that contains the following rule:
 
 ```{r,echo=F}
   data(epi.sim)
-  rule.validation(epi.sim, rules=list(list(
+  rule_validation(epi.sim, rules=list(list(
     "fields"=c("date.of.onset", "date.of.hospitalisation"), "relation"="lt" ) ) )
 ```
