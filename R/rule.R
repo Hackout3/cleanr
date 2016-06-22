@@ -11,13 +11,14 @@ rule.validation <- function( data, rules.file = NULL, rules = NULL )
   if (is.null(rules))
     rules<-yaml::yaml.load_file(rules.file)
 
+  results <- c()
   for(rule in rules)
   {
     if(is.rule(rule))
-      apply.rule(data,rule)
+      results <- c(results,apply.rule(data,rule))
   }
 
-  return(TRUE)
+  return(all(results))
 }
 
 relations <- list(
@@ -85,7 +86,11 @@ apply.rule<-function(data,rule)
   }
 
   if (!all(results))
+  {
     warning("Rows: ", which(!results)[1], " fail rule: ", rule)
+    return(F)
+  }
+  return(T)
 }
 
 is.rule<-function(x)
