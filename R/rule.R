@@ -21,24 +21,34 @@ rule_validation <- function( data, rules_file = NULL, rules = NULL )
   return(all(results))
 }
 
+safe_is_na <- function(x)
+{
+  if (is.na(x))
+    return(TRUE)
+  if (is.character(x)) # is.character(x)&x=="NA" can fail, since R evaluates second even if first is F
+    if (x=="NA")
+      return(TRUE)
+  return(FALSE)
+}
+
 relations <- list(
   list("keywords" = c("gt", "greater_than", ">"), "func"=function(x,y) x>y),
   list("keywords" = c("gte", "greater_than_or_equal", ">="), "func"=function(x,y) x>=y),
   list("keywords" = c("lt", "lesser_than", "<"), "func"=function(x,y) x<y),
   list("keywords" = c("lte", "lesser_than_or_equal", "<="), "func"=function(x,y) x<=y),
   list("keywords" = c("eq", "equal", "=="), "func"=function(x,y) {
-    if (is.na(x)|x=="NA")
-      return(is.na(y)|y=="NA")
-    if (is.na(y))
-      return(FALSE)
+    if (safe_is_na(x))
+      return(safe_is_na(y))
+    if (safe_is_na(y))
+      return(safe_is_na(x))
     return(x==y)
   }),
   list("keywords" = c("not", "!="), "func"=function(x,y)
   {
-    if (is.na(x)|x=="NA")
-      return(!(is.na(y))&y!="NA")
-    if (is.na(y)|y=="NA")
-      return(!(is.na(x))&x!="NA")
+    if (safe_is_na(x))
+      return(!safe_is_na(y))
+    if (safe_is_na(y))
+      return(!safe_is_na(x))
     return(x!=y)
   })
 )
@@ -106,14 +116,16 @@ apply_rule<-function(data,rule)
   {
     op1 <- get_conditional( rule$conditional$operator[1] )
     op2 <- get_conditional( rule$conditional$operator[2] )
-    print( "Happy" )
-    print( rule$conditional )
-    tmp <- mapply( function( f1, f2 )
+
+    fields1 <- data[[rule$fields[1]]]
+    fields2 <- data[[rule$fields[2]]]
+
+    results <- mapply( function( f1, f2 )
       { if (op1(f1,rule$conditional$values[1]))
           return(op2(f2,rule$conditional$values[2]))
         return(TRUE)
       },
-      data[[rule$fields[1]]], data[[rule$fields[1]]] )
+      fields1, fields2 )
   }
 
   if (!all(results))

@@ -36,6 +36,19 @@ test_that("We can get a conditional function by name", {
   expect_false( get_conditional("==")( 1,2 ) )
   expect_true( get_conditional("<=")( 1,2 ) )
   expect_true( get_conditional("<=")( 1,1 ) )
+
+  # NA values
+  expect_true( get_conditional("==")( "NA",NA ) )
+  expect_true( get_conditional("==")( NA,"NA" ) )
+  expect_true( get_conditional("==")( NA,NA ) )
+  expect_true( get_conditional("==")( "NA","NA" ) )
+
+  expect_true( get_conditional("!=")( "NA",1 ) )
+  expect_true( get_conditional("!=")( NA,1 ) )
+  expect_false( get_conditional("!=")( "NA",NA ) )
+  expect_false( get_conditional("!=")( NA,"NA" ) )
+  expect_false( get_conditional("!=")( NA,NA ) )
+  expect_false( get_conditional("!=")( "NA","NA" ) )
 })
 
 test_that("We can specify conditionals", {
@@ -43,10 +56,9 @@ test_that("We can specify conditionals", {
 
   rules <- list(list("fields"=c("date.of.death","outcome"),
               "conditional"=list("operator" = c("not","equal"), "values"=c("NA","Death"))))
-  expect_true( rule_validation(epi.sim[3:5,], rules = rules ) )
+  expect_true( rule_validation(epi.sim[c(4,10),], rules = rules ) )
 
   rules <- list(list("fields"=c("date.of.death","outcome"),
               "conditional"=list("operator" = c("not","equal"), "values"=c("NA","Death"))))
   expect_warning( rule_validation(epi.sim, rules = rules ) )
-
 })
