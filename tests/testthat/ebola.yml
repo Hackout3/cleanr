@@ -1,0 +1,67 @@
+- StatusAsOfCurrentDate:
+    - normalise_whitespace:
+    - recode_character:
+        table:
+          Décédé: "Dead"
+          Decede: "Dead"
+          Deceased: "Dead"
+          Vivant: "Alive"
+          Unknown: !missing
+        unmatched_action: keep # error, missing, keep
+
+- AgeUnit:
+    - normalise_whitespace:
+    - recode_character:
+        table:
+          Ans: Years
+          Mois: Months
+        unmatched_action: keep
+
+- AgeYears:
+    from: Age
+    recode_conditional:
+      group: $AgeUnit
+      table:
+        Years: identity
+        Months: function(x) x / 12
+      unmatched_action: error
+
+- CountryOnset:
+   - normalise_whitespace:
+   - capitalise_first:
+   - recode_character_fuzzy:
+       valid: country_valid.txt
+
+# ## Perhaps have another file called: "recipes.yml" that includes sets
+# ## of rules that would be applied, then use: "apply_recipe":
+# ## "to_yes_or_no".
+# HospitalizedCurrent:
+#   - downcase
+#   - recode_character:
+#       table:
+#         1: "yes"
+#         2: "no"
+#         3: !missing
+#         0: !missing
+#         unk: !missing
+#         yes: "yes"
+#         no: "no"
+
+# DistrictOnset:
+#   - sanitise_whitespace # drop trailing/leading whitespace, collapse consecutive
+
+
+# # generic string replace, e.g., replacing "," values within columns.
+# # One of the columns with names may have these separating first and
+# # last names.
+# DateOnsetYear:
+#   split_year:
+#     from: DateOnset
+
+# DateOnsetMonth:
+#   split_month:
+#     from: DateOnset
+
+# DateOnsetDay:
+#   split_day:
+#     from: DateOnset
