@@ -92,14 +92,12 @@ recode_conditional <- function(x, group, table, unmatched_action="error") {
 
 capitalise_first <- function(x, by_word=TRUE) {
   if (by_word) {
-    ## This is not ideal because it will collapse spaces.  Doing
-    ## this with a regular expression, e.g. on a wordbreak followed
-    ## by lowercase letter would be better.
-    xx <- strsplit(x, "\\s+")
-    vapply(xx, function(x) paste(capitalise_first(x, FALSE), collapse=" "),
-           character(1))
+    stringr::str_to_title(x)
   } else {
-    paste0(toupper(substr(x, 1, 1)), tolower(substr(x, 2, nchar(x))))
+    i <- nzchar(x) & !is.na(x)
+    x[i] <- paste0(toupper(substr(x[i], 1, 1)),
+                   tolower(substr(x[i], 2, nchar(x))))
+    x
   }
 }
 
