@@ -4,17 +4,17 @@
 #'
 #' @param data The data to validate
 #' @param rules List of rules
-#' @param rule.file Optional: the yaml file containing the rules
+#' @param rule_file Optional: the yaml file containing the rules
 #' @export
-rule.validation <- function( data, rules.file = NULL, rules = NULL )
+rule_validation <- function( data, rules_file = NULL, rules = NULL )
 {
   if (is.null(rules))
-    rules<-yaml::yaml.load_file(rules.file)
+    rules<-yaml::yaml.load_file(rules_file)
 
   results <- c()
   for(rule in rules)
   {
-    if(is.rule(rule))
+    if(is_rule(rule))
       results <- c(results,apply.rule(data,rule))
   }
 
@@ -28,7 +28,7 @@ relations <- list(
   list("keywords" = c("lte", "lesser_than_or_equal", "<="), "func"=function(x,y) x<=y)
 )
 
-apply.rule<-function(data,rule)
+apply_rule<-function(data,rule)
 {
   results <- c()
   if("relation" %in% names(rule))
@@ -96,7 +96,7 @@ apply.rule<-function(data,rule)
   return(T)
 }
 
-is.rule<-function(x)
+is_rule<-function(x)
 {
   keywords=c("rule","relation","dependancy","valid","invalid")
   return(any(keywords %in% names(x)))
