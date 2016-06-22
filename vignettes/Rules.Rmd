@@ -39,7 +39,7 @@ which passes for our data set. In contrast, if we require the date.of.onset to b
 ```{r,echo=F}
   data(epi.sim)
   rule.validation(epi.sim, rules=list(list(
-    "field1"="date.of.onset", "field2"="date.of.hospitalisation", "relation"="lt" ) ) )
+    "fields"=c("date.of.onset", "date.of.hospitalisation"), "relation"="lt" ) ) )
 ```
 
 ## (In)valid combinations of values
