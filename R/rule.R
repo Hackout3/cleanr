@@ -34,21 +34,24 @@ apply.rule<-function(data,rule)
     for( relation in relations )
       if (rule$relation %in% relation$keywords)
       {
-        results <- relation$func( data[[rule$field1]], data[[rule$field2]] )
+        results <- relation$func( data[[rule$fields[1]]], data[[rule$fields[2]]] )
         break
       }
   }
 
-
   if("rule" %in% names(rule))
   {
     element<-strsplit(rule$rule," ")[[1]]
-    new.rule<-list(field1=element[1],field2=element[3],relation=element[2])
+    new.rule<-list(fields=c(element[1],element[3]),relation=element[2])
     apply.rule(data,new.rule)
   }
 
   if (!all(results))
-    warning("Rows: ", which(!results)[1], " fail rule: ", rule)
+  {
+    if("relation" %in% names(rule))
+      warning.description<-paste(rule$fields[1], rule$relation, rule$fields[2])
+    warning("Rows: ", which(!results)[1], "; failed rule: ", warning.description)
+  }
 }
 
 is.rule<-function(x)
