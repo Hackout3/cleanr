@@ -51,14 +51,36 @@ apply.rule<-function(data,rule)
   if("invalid" %in% names(rule))
   {
     values <- rule$invalid
-
+    # Support both [value1, value2] and [[value1, value2],[alt_value1,alt_value2]], so we normalize them here
     if (class(values)!="list")
     {
       values <- list(values)
     }
-    for( value in values )
+
+    for (value in values)
     {
-      results <- !(data[[rule$fields[1]]]==value[1] & data[[rule$fields[2]]]==value[2])
+      results.df <- mapply(function(f,v) (data[[f]]==v), rule$fields, value)
+      results <- !(rowSums(results.df)==ncol(results.df)) # If all are true then all fields match all values (and sum==ncol)
+    }
+  }
+
+  if("valid" %in% names(rule))
+  {
+    values <- rule$valid
+    # Support both [value1, value2] and [[value1, value2],[alt_value1,alt_value2]], so we normalize them here
+    if (class(values)!="list")
+    {
+      values <- list(values)
+    }
+
+    results <- NULL
+    for (value in values)
+    {
+      results.df <- mapply(function(f,v) (data[[f]]==v), rule$fields, value)
+      if (is.null(results))
+        results <- (rowSums(results.df)==ncol(results.df))
+      else
+        results <- (rowSums(results.df)==ncol(results.df))|results # Match this set of values or the previous set of values
     }
   }
 
