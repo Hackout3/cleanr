@@ -45,3 +45,10 @@ which passes for our data set. In contrast, if we require the date.of.onset to b
 ## (In)valid combinations of values
 
 TODO: Valid/required? does not need to be all valid combinations, i.e. if time of death is set then outcome is death. (valid is value1&value2, invalid is value1!=value2
+
+Combinations to be supported:
+
+- If male then not vagina
+- If date.of.death then outcome needs to be death (this is a dependent pair I guess)
+- Define all valid pairs (no other pairing is allowed)
+
