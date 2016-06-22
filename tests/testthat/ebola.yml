@@ -32,6 +32,15 @@
    - recode_character_fuzzy:
        valid: country_valid.txt
 
+- HospitalizedEver:
+  - normalise_whitespace:
+  - capitalise_first:
+  - recode_character:
+      table:
+        Yes: TRUE
+        No: FALSE
+      unmatched_action: error
+
 # ## Perhaps have another file called: "recipes.yml" that includes sets
 # ## of rules that would be applied, then use: "apply_recipe":
 # ## "to_yes_or_no".
