@@ -25,20 +25,38 @@ relations <- list(
   list("keywords" = c("gt", "greater_than", ">"), "func"=function(x,y) x>y),
   list("keywords" = c("gte", "greater_than_or_equal", ">="), "func"=function(x,y) x>=y),
   list("keywords" = c("lt", "lesser_than", "<"), "func"=function(x,y) x<y),
-  list("keywords" = c("lte", "lesser_than_or_equal", "<="), "func"=function(x,y) x<=y)
+  list("keywords" = c("lte", "lesser_than_or_equal", "<="), "func"=function(x,y) x<=y),
+  list("keywords" = c("eq", "equal", "=="), "func"=function(x,y) {
+    if (is.na(x)|x=="NA")
+      return(is.na(y)|y=="NA")
+    if (is.na(y))
+      return(FALSE)
+    return(x==y)
+  }),
+  list("keywords" = c("not", "!="), "func"=function(x,y)
+  {
+    if (is.na(x)|x=="NA")
+      return(!(is.na(y))&y!="NA")
+    if (is.na(y)|y=="NA")
+      return(!(is.na(x))&x!="NA")
+    return(x!=y)
+  })
 )
+
+get_conditional <- function( name )
+{
+  for( relation in relations )
+     if (name %in% relation$keywords)
+       return( relation$func )
+  stop( "Operator ", name, " is not defined" )
+}
 
 apply_rule<-function(data,rule)
 {
   results <- c()
   if("relation" %in% names(rule))
   {
-    for( relation in relations )
-      if (rule$relation %in% relation$keywords)
-      {
-        results <- relation$func( data[[rule$fields[1]]], data[[rule$fields[2]]] )
-        break
-      }
+    results <- get_conditional( rule$relation )( data[[rule$fields[1]]], data[[rule$fields[2]]] )
   }
 
   if("rule" %in% names(rule))
@@ -84,6 +102,20 @@ apply_rule<-function(data,rule)
     }
   }
 
+  if ("conditional" %in% names(rule))
+  {
+    op1 <- get_conditional( rule$conditional$operator[1] )
+    op2 <- get_conditional( rule$conditional$operator[2] )
+    print( "Happy" )
+    print( rule$conditional )
+    tmp <- mapply( function( f1, f2 )
+      { if (op1(f1,rule$conditional$values[1]))
+          return(op2(f2,rule$conditional$values[2]))
+        return(TRUE)
+      },
+      data[[rule$fields[1]]], data[[rule$fields[1]]] )
+  }
+
   if (!all(results))
   {
     if("relation" %in% names(rule))
@@ -98,6 +130,6 @@ apply_rule<-function(data,rule)
 
 is_rule<-function(x)
 {
-  keywords=c("rule","relation","dependancy","valid","invalid")
+  keywords=c("rule","relation","conditional","valid","invalid")
   return(any(keywords %in% names(x)))
 }

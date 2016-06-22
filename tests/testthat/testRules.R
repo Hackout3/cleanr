@@ -30,3 +30,23 @@ test_that("We can require value combinations for given fields", {
   rules <- list(list("fields"=c("gender","generation"), "valid"=list(c("f",0),c("m",0))))
   expect_warning( rule_validation(epi.sim, rules = rules ) )
 })
+
+test_that("We can get a conditional function by name", {
+  expect_true( get_conditional("==")( 1,1 ) )
+  expect_false( get_conditional("==")( 1,2 ) )
+  expect_true( get_conditional("<=")( 1,2 ) )
+  expect_true( get_conditional("<=")( 1,1 ) )
+})
+
+test_that("We can specify conditionals", {
+  data(epi.sim)
+
+  rules <- list(list("fields"=c("date.of.death","outcome"),
+              "conditional"=list("operator" = c("not","equal"), "values"=c("NA","Death"))))
+  expect_true( rule_validation(epi.sim[3:5,], rules = rules ) )
+
+  rules <- list(list("fields"=c("date.of.death","outcome"),
+              "conditional"=list("operator" = c("not","equal"), "values"=c("NA","Death"))))
+  expect_warning( rule_validation(epi.sim, rules = rules ) )
+
+})
