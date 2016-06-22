@@ -88,6 +88,8 @@ apply.rule<-function(data,rule)
   {
     if("relation" %in% names(rule))
       warning.description<-paste(rule$fields[1], rule$relation, rule$fields[2])
+    else
+      warning.description<-rule
     warning("Rows: ", which(!results)[1], "; failed rule: ", warning.description)
     return(F)
   }
