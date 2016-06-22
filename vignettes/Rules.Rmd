@@ -49,29 +49,54 @@ which passes for our data set. In contrast, if we require the date.of.onset to b
 [in progress]
 
 The combination set of rules define combinations of values between columns which are valid or invalid.  
-
-Combinations to be supported:
-
-- If male then not vagina
-- If date.of.death then outcome needs to be death (this is a dependent pair I guess)
-- Define all valid pairs (no other pairing is allowed)
-
 For example by using the rule.yaml file that contains the following rule:
 ```
 - fields:
     - gender
     - generation
-  valid: [[f,0],[m,1]]
+  invalid: [f,0]
 ```
 
 ```{r,echo=F}
   data(epi.sim)
   rule_validation(epi.sim, rules=list(list(
-    "fields"=c("date.of.onset", "date.of.hospitalisation"), "relation"="lt" ) ) )
+    "fields"=c("gender", "generation"), "invalid"=c("f",0) ) ) )
 ```
+
+Similarly if we specify `invalid: [f,100]` it does pass, because this combination does not occur in the data set.
+
+You can also provide all the valid combinations by using `valid: [["f",1],["m",1], ...]`. Be aware that in this case you need to specify all the valid combinations and it will throw an error if the data contains any information that is not there.
 
 ## Conditional values in dataset
 
+Conditional is more general version of valid/invalid although limited to two fields.
+
+Ideas:
+- I think conditionals should allow if (death=T then date.of.death !NA, or >... ).
+    - This could be done by specifying the type of conditional? >, not, etc...
+  
+What we want to be able to express is 
+```
+if (field1 equal/greater_than/...) then
+  field2 equal/lesser_than/not/...
+```
+
+```
+- fields: [date.of.death, outcome]
+  conditional:
+    operator: ["not", "equal"]
+    values: ["NA", "Death"]
+```
+
+Supported operater:
+
+  - equal, ==
+  - not, !=
+  - gt, >, greater_than
+  - lt, <, lesser_than
+  - lte, <=, lesser_than_or_equal
+  - gte, >=, greater_than_or_equal
+  
 [in progress]
 
 Some values are imposed conditional of others in the dataset. For example if a patient is given a date of death, their status need to be "dead". A patient whose status in the dataset is "alive" while having a date of death should be flagged up for correction.
