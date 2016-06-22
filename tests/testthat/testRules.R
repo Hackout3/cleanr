@@ -10,11 +10,10 @@ test_that("Rules defined by relation keyword work", {
 })
 
 test_that("We can exclude relations between fields", {
-
   data(epi.sim)
-  rules <- list(list("fields"=c("gender","generation"), "values"=list("invalid"=c("f",0))))
+  rules <- list(list("fields"=c("gender","generation"), "invalid"=c("f",0)))
   expect_warning( rule.validation(epi.sim, rules = rules ) )
 
-  rules <- list(list("fields"=c("gender","generation"), "values"=list("invalid"=c("f",10))))
+  rules <- list(list("fields"=c("gender","generation"), "invalid"=c("f",100)))
   expect_true( rule.validation(epi.sim, rules = rules ) )
 })

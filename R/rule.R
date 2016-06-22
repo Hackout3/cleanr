@@ -48,12 +48,26 @@ apply.rule<-function(data,rule)
     apply.rule(data,new.rule)
   }
 
+  if("invalid" %in% names(rule))
+  {
+    values <- rule$invalid
+
+    if (class(values)!="list")
+    {
+      values <- list(values)
+    }
+    for( value in values )
+    {
+      results <- !(data[[rule$fields[1]]]==value[1] & data[[rule$fields[2]]]==value[2])
+    }
+  }
+
   if (!all(results))
     warning("Rows: ", which(!results)[1], " fail rule: ", rule)
 }
 
 is.rule<-function(x)
 {
-  keywords=c("rule","relation","dependancy")
+  keywords=c("rule","relation","dependancy","valid","invalid")
   return(any(keywords %in% names(x)))
 }
