@@ -1,6 +1,6 @@
 ---
 title: "Rules for field/column combinations"
-author: "Edwin van Leeuwen"
+author: "Edwin van Leeuwen, Marc Baguelin"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -22,18 +22,20 @@ data(epi.sim)
 pander(head(epi.sim))
 ```
 
-## Relation
+## Relation between columns
 
-For example if we have a rule.yaml file that contains the following rule:
+Relation rules are linking two columns with a rule that should be respected for all the pairs of values. To test if the rule is respected in a given dataset, the `rule_validation` function can be used with the rules inputed from a yaml file.
+
+For example by using the rule.yaml file that contains the following rule:
 ```
 - fields:
     - date.of.onset
     - date.of.hospitalisation
   relation: lte
 ```
-which requires that date.of.onset should always be lesser than or equal to date.of.hospitalisation.
+we require that date.of.onset should always be lesser than or equal to date.of.hospitalisation.
 ```{r,eval=F}
-rule.validation(epi.sim, rules.file="rule.yaml")
+rule_validation(epi.sim, rules.file="rule.yaml")
 ```
 which passes for our data set. In contrast, if we require the date.of.onset to be strictly lesser than, by replacing `lte` with `lt` it will throw a warning and return `FALSE`:
 ```{r,echo=F}
@@ -44,7 +46,9 @@ which passes for our data set. In contrast, if we require the date.of.onset to b
 
 ## (In)valid combinations of values
 
-TODO: Valid/required? does not need to be all valid combinations, i.e. if time of death is set then outcome is death. (valid is value1&value2, invalid is value1!=value2
+[in progress]
+
+The combination set of rules define combinations of values between columns which are valid or invalid.  
 
 Combinations to be supported:
 
@@ -52,3 +56,36 @@ Combinations to be supported:
 - If date.of.death then outcome needs to be death (this is a dependent pair I guess)
 - Define all valid pairs (no other pairing is allowed)
 
+For example by using the rule.yaml file that contains the following rule:
+```
+- fields:
+    - gender
+    - generation
+  valid: [[f,0],[m,1]]
+```
+
+```{r,echo=F}
+  data(epi.sim)
+  rule.validation(epi.sim, rules=list(list(
+    "fields"=c("date.of.onset", "date.of.hospitalisation"), "relation"="lt" ) ) )
+```
+
+## Conditional values in dataset
+
+[in progress]
+
+Some values are imposed conditional of others in the dataset. For example if a patient is given a date of death, their status need to be "dead". A patient whose status in the dataset is "alive" while having a date of death should be flagged up for correction.
+
+For example by using the rule.yaml file that contains the following rule:
+```
+- fields:
+    - date.of.death
+    - status
+  conditional:[]
+```
+
+```{r,echo=F}
+  data(epi.sim)
+  rule.validation(epi.sim, rules=list(list(
+    "fields"=c("date.of.onset", "date.of.hospitalisation"), "relation"="lt" ) ) )
+```
