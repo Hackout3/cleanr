@@ -11,12 +11,14 @@ rule.validation <- function( data, rules.file = NULL, rules = NULL )
   if (is.null(rules))
     rules<-yaml::yaml.load_file(rules.file)
 
+  results <- c()
   for(rule in rules)
   {
     if(is.rule(rule))
-      apply.rule(data,rule)
+      results <- c(results,apply.rule(data,rule))
   }
 
+  return(all(results))
 }
 
 relations <- list(
@@ -46,16 +48,54 @@ apply.rule<-function(data,rule)
     apply.rule(data,new.rule)
   }
 
+  if("invalid" %in% names(rule))
+  {
+    values <- rule$invalid
+    # Support both [value1, value2] and [[value1, value2],[alt_value1,alt_value2]], so we normalize them here
+    if (class(values)!="list")
+    {
+      values <- list(values)
+    }
+
+    for (value in values)
+    {
+      results.df <- mapply(function(f,v) (data[[f]]==v), rule$fields, value)
+      results <- !(rowSums(results.df)==ncol(results.df)) # If all are true then all fields match all values (and sum==ncol)
+    }
+  }
+
+  if("valid" %in% names(rule))
+  {
+    values <- rule$valid
+    # Support both [value1, value2] and [[value1, value2],[alt_value1,alt_value2]], so we normalize them here
+    if (class(values)!="list")
+    {
+      values <- list(values)
+    }
+
+    results <- NULL
+    for (value in values)
+    {
+      results.df <- mapply(function(f,v) (data[[f]]==v), rule$fields, value)
+      if (is.null(results))
+        results <- (rowSums(results.df)==ncol(results.df))
+      else
+        results <- (rowSums(results.df)==ncol(results.df))|results # Match this set of values or the previous set of values
+    }
+  }
+
   if (!all(results))
   {
     if("relation" %in% names(rule))
       warning.description<-paste(rule$fields[1], rule$relation, rule$fields[2])
     warning("Rows: ", which(!results)[1], "; failed rule: ", warning.description)
+    return(F)
   }
+  return(T)
 }
 
 is.rule<-function(x)
 {
-  keywords=c("rule","relation","dependancy")
+  keywords=c("rule","relation","dependancy","valid","invalid")
   return(any(keywords %in% names(x)))
 }
