@@ -1,0 +1,47 @@
+---
+title: "Rules for field/column combinations"
+author: "Edwin van Leeuwen"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r,include=F}
+library(pander)
+```
+
+The package `cleanr` supports defining a set of rules that fields/columns need to conform to, e.g. the values in one column should always be higher than in another. The rules are defined can be read from a yaml file, or passed as a list. There are two types of rules supported 1) a required relation between fields (e.g. one field need to always be higher than the other and 2) accepted/valid and invalid combinations of values (e.g. the outcome of a disease needs to be death if a time of death is set).
+
+Below follow some examples. All examples use an simulated set of epidemiological data (`epi.sim`)
+```{r,echo=F}
+library(cleanr)
+data(epi.sim)
+pander(head(epi.sim))
+```
+
+## Relation
+
+For example if we have a rule.yaml file that contains the following rule:
+```
+- fields:
+    - date.of.onset
+    - date.of.hospitalisation
+  relation: lte
+```
+which requires that date.of.onset should always be lesser than or equal to date.of.hospitalisation.
+```{r,eval=F}
+rule.validation(epi.sim, rules.file="rule.yaml")
+```
+which passes for our data set. In contrast, if we require the date.of.onset to be strictly lesser than, by replacing `lte` with `lt` it will throw a warning and return `FALSE`:
+```{r,echo=F}
+  data(epi.sim)
+  rule.validation(epi.sim, rules=list(list(
+    "field1"="date.of.onset", "field2"="date.of.hospitalisation", "relation"="lt" ) ) )
+```
+
+## (In)valid combinations of values
+
+TODO: Valid/required? does not need to be all valid combinations, i.e. if time of death is set then outcome is death. (valid is value1&value2, invalid is value1!=value2
