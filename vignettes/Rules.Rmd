@@ -13,7 +13,9 @@ vignette: >
 library(pander)
 ```
 
-The package `cleanr` supports defining a set of rules that fields/columns need to conform to, e.g. the values in one column should always be higher than in another. The rules are defined can be read from a yaml file, or passed as a list. There are two types of rules supported 1) a required relation between fields (e.g. one field need to always be higher than the other and 2) accepted/valid and invalid combinations of values (e.g. the outcome of a disease needs to be death if a time of death is set).
+The package `cleanr` provide tools to efficiently check the integrity and consistency of datasets. In particular, set of rules to which fields/columns need to conform to can be implemented. Rules can be as simple as checking that the values in one column are always be higher than in another or more complex functional between values of two fields. The defined rules can be read from a yaml file, or passed as a list.
+
+There are two types of rules supported 1) a required relation between fields (e.g. one field need to always be higher than the other and 2) accepted/valid and invalid combinations of values (e.g. the outcome of a disease needs to be death if a time of death is set).
 
 Below follow some examples. All examples use an simulated set of epidemiological data (`epi.sim`)
 ```{r,echo=F}
