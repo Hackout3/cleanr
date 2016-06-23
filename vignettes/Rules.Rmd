@@ -35,7 +35,7 @@ For example by using the rule.yaml file that contains the following rule:
 ```
 we require that date.of.onset should always be lesser than or equal to date.of.hospitalisation.
 ```{r,eval=F}
-rule_validation(epi.sim, rules.file="rule.yaml")
+rule_validation(epi.sim, rules_file="rule.yaml")
 ```
 which passes for our data set. In contrast, if we require the date.of.onset to be strictly lesser than, by replacing `lte` with `lt` it will throw a warning and return `FALSE`:
 ```{r,echo=F}
@@ -70,25 +70,32 @@ You can also provide all the valid combinations by using `valid: [["f",1],["m",1
 ## Conditional values in dataset
 
 Conditional is more general version of valid/invalid although limited to two fields.
+Some values are imposed conditional of others in the dataset. For example if a patient is given a date of death, the outcome  should be "death". A patient who has a different status than `death` while having a date of death should be flagged up for correction.
 
-Ideas:
-- I think conditionals should allow if (death=T then date.of.death !NA, or >... ).
-    - This could be done by specifying the type of conditional? >, not, etc...
-  
-What we want to be able to express is 
-```
-if (field1 equal/greater_than/...) then
-  field2 equal/lesser_than/not/...
-```
-
+A rule testing for that would be: 
 ```
 - fields: [date.of.death, outcome]
   conditional:
     operator: ["not", "equal"]
     values: ["NA", "Death"]
 ```
+i.e. if the date.of.death is not equal to NA the outcome has to be equal to Death.
+ 
+In the `epi.sim` dataset quite a few records have a data of death recorded, so testing it for this rule results in a warning.
 
-Supported operater:
+```{r,eval=F}
+rule_validation(epi.sim, rules_file = rules.yaml )
+```
+
+```{r,echo=F}
+  rules <- list(list("fields"=c("date.of.death","outcome"),
+              "conditional"=list("operator" = c("not","equal"), "values"=c("NA","Death"))))
+ rule_validation(epi.sim, rules = rules )
+```
+
+## Operators
+
+For both the relation and conditional rules a number of operators are supported:
 
   - equal, ==
   - not, !=
@@ -96,21 +103,4 @@ Supported operater:
   - lt, <, lesser_than
   - lte, <=, lesser_than_or_equal
   - gte, >=, greater_than_or_equal
-  
-[in progress]
-
-Some values are imposed conditional of others in the dataset. For example if a patient is given a date of death, their status need to be "dead". A patient whose status in the dataset is "alive" while having a date of death should be flagged up for correction.
-
-For example by using the rule.yaml file that contains the following rule:
-```
-- fields:
-    - date.of.death
-    - status
-  conditional:[]
-```
-
-```{r,echo=F}
-  data(epi.sim)
-  rule_validation(epi.sim, rules=list(list(
-    "fields"=c("date.of.onset", "date.of.hospitalisation"), "relation"="lt" ) ) )
-```
+ 
