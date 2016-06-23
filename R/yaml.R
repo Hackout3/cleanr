@@ -62,3 +62,21 @@ from_yaml_ordered_map <- function(dat, named=TRUE) {
   names(dat_contents) <- dat_names
   dat_contents
 }
+
+sanitise_yaml_key <- function(x) {
+  i <- !grepl("^[[:alnum:] _]+$", x)
+  if (any(i)) {
+    ## TODO: this does not deal with quoting
+    j <- grepl('"', x[i])
+    if (any(j)) {
+      stop("I don't know how to escape quotes yet!")
+    }
+    ## Escape backslashes
+    j <- grepl('\\', x[i], fixed=TRUE)
+    if (any(j)) {
+      x[i][j] <- gsub("\\", "\\\\", x[i][j], fixed=TRUE)
+    }
+    x[i] <- sprintf('"%s"', x[i])
+  }
+  x
+}

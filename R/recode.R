@@ -26,6 +26,8 @@ recode_apply <- function(name, data, rule) {
     if (any(i)) {
       r[i] <- lapply(r[i], function(x) data[[sub("^\\$", "", x)]])
     }
+    ## TODO: using do.call here is really suboptimal when 'x' might be
+    ## large.  More background: http://rpubs.com/hadley/do-call2
     x <- do.call(f, c(list(x), r), quote=TRUE)
   }
 

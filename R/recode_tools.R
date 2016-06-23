@@ -4,6 +4,9 @@
 ## is, then make it be a yml file that contains just "Bad: Good"
 ## matches, in the style of a normal yaml hash.
 recode_character <- function(x, table, unmatched_action="missing") {
+  if (possible_filename(table) && file.exists(table)) {
+    table <- yaml_read(table)
+  }
   ## TODO: Do this validation elsewhere?
   if (is.list(table)) {
     stopifnot(all(lengths(table) == 1))
@@ -42,7 +45,6 @@ recode_integer_scale <- function(x, lowest) {
 
 recode_character_fuzzy <- function(x, table_filename,
                                    unmatched_action="keep", ...) {
-  browser()
   if (file.exists(table_filename)) {
     table <- yaml_read(table_filename)
     valid <- na.omit(unique(vapply(table, function(x) as.character(x[[1L]]),
@@ -53,9 +55,15 @@ recode_character_fuzzy <- function(x, table_filename,
     valid <- character(0)
   }
 
+  ## Empty strings cause problems.  We could recode these as "" on
+  ## exit but that does not seem useful.
+  x[x == ""] <- NA_character_
+
   ## TODO: For multimatches here, do not trigger when there is an
   ## exact match.
-  xx <- unique(na.omit(x))
+  xx <- unique(setdiff(na.omit(x), valid))
+  ## TODO: move to proper string distances because the agrep misses
+  ## some matches when the first argument is longer than the second.
   i <- lapply(xx, agrep, valid)
   n <- lengths(i)
 
@@ -70,9 +78,10 @@ recode_character_fuzzy <- function(x, table_filename,
   if (any(unmatched)) {
     unmatched_n <- table(x[x %in% xx[unmatched]])
     j <- order(-unmatched_n, names(unmatched_n))
-    str_unmatched <- sprintf("%s: !missing # (%d times)",
-                             names(unmatched_n[j]),
-                             unname(unmatched_n[j]))
+    nn <- unname(unmatched_n[j])
+    str_unmatched <- sprintf("%s: !missing # (%d time%s)",
+                             sanitise_yaml_key(names(unmatched_n[j])),
+                             nn, ifelse(nn > 1, "s", ""))
     str <- c(str, paste0(c("# Cases with no match:", str_unmatched),
                          collapse="\n"))
   }
@@ -83,36 +92,41 @@ recode_character_fuzzy <- function(x, table_filename,
       vapply(i[multimatch], function(k) paste(valid[k], collapse=", "),
              character(1))
     str_multimatch <-
-      sprintf("%s: !missing # %s", xx[multimatch][j], multimatch_pos[j])
+      sprintf("%s: !missing # %s", sanitise_yaml_key(xx[multimatch][j]),
+              multimatch_pos[j])
     str <- c(str, paste0(c("# Cases with more than one match:", str_multimatch),
                          collapse="\n"))
   }
 
   if (any(matched)) {
     f <- function(x) {
-      setdiff(tmp[[x]][order(drop(adist(tmp[[x]], x)), decreasing=TRUE)], x)
+      tmp[[x]][order(drop(adist(tmp[[x]], x)), decreasing=TRUE)]
     }
     tmp <- setNames(split(xx[matched], unlist(i[matched])),
                     valid[sort(unique(unlist(i[matched])))])
     tmp <- setNames(lapply(names(tmp), f), names(tmp))
     matches <- tmp[lengths(tmp) > 0]
-    str_match <- sprintf("%s: %s",
-                         unlist(matches), rep(names(matches), lengths(matches)))
-    ## TODO: extra newline between blocks
-    str <- c(str, paste0(c("# New possible matches:", str_match),
-                         collapse="\n"))
+    str_match <- vapply(names(matches), function(x)
+      paste(sprintf("%s: %s", sanitise_yaml_key(matches[[x]]), x),
+            collapse="\n"),
+      character(1))
+    str_match <- paste0(c(
+      "# New possible matches (in decreasing badness within groups):",
+      paste(str_match, collapse="\n\n")),
+      collapse="\n")
+    str <- c(str, str_match)
   }
 
   if (length(str) > 0L) {
-    ## TODO: Need to quote things that contain punctuation when
-    ## writing this out.
     table_filename_new <- sub(".yml$", "_new.yml", table_filename)
     writeLines(paste(str, collapse="\n\n"), table_filename_new)
     msg <- c(sprintf("New entries have been added to %s\n", table_filename_new),
              sprintf("Please edit %s and add appropriate new entries and rerun",
                      table_filename))
-    stop(msg)
+    stop(msg, call.=FALSE)
   }
+
+  x
 }
 
 recode_conditional <- function(x, group, table, unmatched_action="error") {
@@ -150,4 +164,8 @@ capitalise_first <- function(x, by_word=TRUE) {
 
 normalise_whitespace <- function(x) {
   gsub("\\s+", " ", trimws(x))
+}
+
+possible_filename <- function(x) {
+  is.character(x) && length(x) == 1 && is.null(names(x))
 }
