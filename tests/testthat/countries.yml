@@ -1,0 +1,5 @@
+- CountryRes:
+  - normalise_whitespace:
+  - capitalise_first:
+  - recode_character_fuzzy:
+      table_filename: country_valid.yml
