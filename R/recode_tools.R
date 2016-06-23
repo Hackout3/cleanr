@@ -1,5 +1,8 @@
 ## TODO: export and document all of these.
 
+## TODO: this would be nice if table could also be a filename.  If it
+## is, then make it be a yml file that contains just "Bad: Good"
+## matches, in the style of a normal yaml hash.
 recode_character <- function(x, table, unmatched_action="missing") {
   ## TODO: Do this validation elsewhere?
   if (is.list(table)) {
@@ -37,35 +40,79 @@ recode_integer_scale <- function(x, lowest) {
   as.character(cut(x, at, right=FALSE, labels=labels))
 }
 
-recode_character_fuzzy <- function(x, valid, unmatched_action="keep", ...) {
-  if (length(valid) == 1L && file.exists(valid)) {
-    valid <- readLines(valid)
+recode_character_fuzzy <- function(x, table_filename,
+                                   unmatched_action="keep", ...) {
+  browser()
+  if (file.exists(table_filename)) {
+    table <- yaml_read(table_filename)
+    valid <- na.omit(unique(vapply(table, function(x) as.character(x[[1L]]),
+                                   character(1))))
+    x <- recode_character(x, table, unmatched_action="keep")
+  } else {
+    ## TODO: Consider trying to detect the most common cases.
+    valid <- character(0)
   }
-  unmatched_action <- match.arg(unmatched_action, c("missing", "error", "keep"))
-  f <- function(x) {
-    i <- agrep(x, valid, ...)
-    if (length(i) == 0L) {
-      NA_integer_
-    } else if (length(i) > 1L) {
-      stop("multiple matches -- fixme")
-    } else {
-      i
+
+  ## TODO: For multimatches here, do not trigger when there is an
+  ## exact match.
+  xx <- unique(na.omit(x))
+  i <- lapply(xx, agrep, valid)
+  n <- lengths(i)
+
+  ## For now, give a message about match failures, later on we'll do
+  ## something sensible with that in a reporting framework.
+  unmatched <- n == 0L
+  multimatch <- n > 1L
+  matched <- n == 1L
+
+  str <- character()
+
+  if (any(unmatched)) {
+    unmatched_n <- table(x[x %in% xx[unmatched]])
+    j <- order(-unmatched_n, names(unmatched_n))
+    str_unmatched <- sprintf("%s: !missing # (%d times)",
+                             names(unmatched_n[j]),
+                             unname(unmatched_n[j]))
+    str <- c(str, paste0(c("# Cases with no match:", str_unmatched),
+                         collapse="\n"))
+  }
+
+  if (any(multimatch)) {
+    j <- order(xx[multimatch])
+    multimatch_pos <-
+      vapply(i[multimatch], function(k) paste(valid[k], collapse=", "),
+             character(1))
+    str_multimatch <-
+      sprintf("%s: !missing # %s", xx[multimatch][j], multimatch_pos[j])
+    str <- c(str, paste0(c("# Cases with more than one match:", str_multimatch),
+                         collapse="\n"))
+  }
+
+  if (any(matched)) {
+    f <- function(x) {
+      setdiff(tmp[[x]][order(drop(adist(tmp[[x]], x)), decreasing=TRUE)], x)
     }
+    tmp <- setNames(split(xx[matched], unlist(i[matched])),
+                    valid[sort(unique(unlist(i[matched])))])
+    tmp <- setNames(lapply(names(tmp), f), names(tmp))
+    matches <- tmp[lengths(tmp) > 0]
+    str_match <- sprintf("%s: %s",
+                         unlist(matches), rep(names(matches), lengths(matches)))
+    ## TODO: extra newline between blocks
+    str <- c(str, paste0(c("# New possible matches:", str_match),
+                         collapse="\n"))
   }
-  i <- vapply(unique(x), f, integer(1), USE.NAMES=FALSE)
-  i <- i[match(x, unique(x))]
-  j <- is.na(i) & !is.na(x)
-  ret <- setNames(valid[i], names(x))
-  ## NOTE: This duplicated from recode_character
-  if (any(j)) {
-    if (unmatched_action == "error") {
-      stop("Unknown entry: ",
-           paste(unique(x[j]), collapse=", "))
-    } else if (unmatched_action == "keep") {
-      ret[j] <- x[j]
-    }
+
+  if (length(str) > 0L) {
+    ## TODO: Need to quote things that contain punctuation when
+    ## writing this out.
+    table_filename_new <- sub(".yml$", "_new.yml", table_filename)
+    writeLines(paste(str, collapse="\n\n"), table_filename_new)
+    msg <- c(sprintf("New entries have been added to %s\n", table_filename_new),
+             sprintf("Please edit %s and add appropriate new entries and rerun",
+                     table_filename))
+    stop(msg)
   }
-  ret
 }
 
 recode_conditional <- function(x, group, table, unmatched_action="error") {
