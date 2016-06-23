@@ -20,6 +20,7 @@ recode_character <- function(x, table, unmatched_action="missing") {
     from <- names(table)
     to <- unname(table)
   }
+  x[x == ""] <- NA_character_
   i <- match(x, from)
   j <- is.na(i) & !is.na(x)
   ret <- setNames(to[i], names(x))
