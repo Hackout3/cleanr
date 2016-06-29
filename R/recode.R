@@ -13,10 +13,10 @@ recode <- function(data, rules) {
 
 recode_apply <- function(name, data, rule) {
   if ("from" %in% names(rule)) {
-    x <- data[[rule$from]]
+    x <- unname(data[rule$from])
     fun <- setdiff(names(rule), "from")
   } else {
-    x <- data[[name]]
+    x <- data[name]
     fun <- names(rule)
   }
 
@@ -28,10 +28,10 @@ recode_apply <- function(name, data, rule) {
     }
     ## TODO: using do.call here is really suboptimal when 'x' might be
     ## large.  More background: http://rpubs.com/hadley/do-call2
-    x <- do.call(f, c(list(x), r), quote=TRUE)
+    x <- list(do.call(f, c(x, r), quote=TRUE))
   }
 
-  data[[name]] <- x
+  data[name] <- x
   data
 }
 

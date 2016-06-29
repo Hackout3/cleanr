@@ -1,0 +1,3 @@
+- min:
+    from: [old1, old2]
+    pmin:
