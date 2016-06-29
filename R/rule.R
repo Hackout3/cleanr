@@ -15,7 +15,7 @@ rule_validation <- function( data, rules_file = NULL, rules = NULL )
   for(rule in rules)
   {
     if(is_rule(rule))
-      results <- c(results,apply.rule(data,rule))
+      results <- c(results,apply_rule(data,rule))
   }
 
   return(all(results))
@@ -44,8 +44,8 @@ apply_rule<-function(data,rule)
   if("rule" %in% names(rule))
   {
     element<-strsplit(rule$rule," ")[[1]]
-    new.rule<-list(fields=c(element[1],element[3]),relation=element[2])
-    apply.rule(data,new.rule)
+    new_rule<-list(fields=c(element[1],element[3]),relation=element[2])
+    apply_rule(data,new_rule)
   }
 
   if("invalid" %in% names(rule))
@@ -59,8 +59,8 @@ apply_rule<-function(data,rule)
 
     for (value in values)
     {
-      results.df <- mapply(function(f,v) (data[[f]]==v), rule$fields, value)
-      results <- !(rowSums(results.df)==ncol(results.df)) # If all are true then all fields match all values (and sum==ncol)
+      results_df <- mapply(function(f,v) (data[[f]]==v), rule$fields, value)
+      results <- !(rowSums(results_df)==ncol(results_df)) # If all are true then all fields match all values (and sum==ncol)
     }
   }
 
@@ -76,24 +76,24 @@ apply_rule<-function(data,rule)
     results <- NULL
     for (value in values)
     {
-      results.df <- mapply(function(f,v) (data[[f]]==v), rule$fields, value)
+      results_df <- mapply(function(f,v) (data[[f]]==v), rule$fields, value)
       if (is.null(results))
-        results <- (rowSums(results.df)==ncol(results.df))
+        results <- (rowSums(results_df)==ncol(results_df))
       else
-        results <- (rowSums(results.df)==ncol(results.df))|results # Match this set of values or the previous set of values
+        results <- (rowSums(results_df)==ncol(results_df))|results # Match this set of values or the previous set of values
     }
   }
 
   if (!all(results))
   {
     if("relation" %in% names(rule))
-      warning.description<-paste(rule$fields[1], rule$relation, rule$fields[2])
+      warning_description<-paste(rule$fields[1], rule$relation, rule$fields[2])
     else
-      warning.description<-rule
-    warning("Rows: ", which(!results)[1], "; failed rule: ", warning.description)
-    return(F)
+      warning_description<-rule
+    warning("Rows: ", which(!results)[1], "; failed rule: ", warning_description)
+    return(FALSE)
   }
-  return(T)
+  return(TRUE)
 }
 
 is_rule<-function(x)
