@@ -1,5 +1,20 @@
 context("recode")
 
+test_that("rename", {
+  rules <- recode_read("rename.yml")
+  data <- data.frame(old=runif(10))
+  data2 <- recode(data, rules)
+  expect_identical(data2$new, sqrt(data$old))
+})
+
+test_that("recipe", {
+  rules <- recode_read("use_recipe.yml", "rename_recipes.yml")
+  data <- data.frame(old=as.character(runif(10)))
+  data2 <- recode(data, rules)
+  expect_equal(data2$old, sqrt(as.numeric(data$old)))
+  expect_equal(names(data2), names(data))
+})
+
 test_that("recode two columns", {
   rules <- recode_read("two.yml")
   data <- data.frame(old1=runif(10), old2=runif(10))

@@ -16,7 +16,7 @@ recode_apply <- function(name, data, rule) {
     x <- unname(data[rule$from])
     fun <- setdiff(names(rule), "from")
   } else {
-    x <- data[name]
+    x <- unname(data[name])
     fun <- names(rule)
   }
 
