@@ -1,2 +1,3 @@
-to1: from1
-to2: from2
+## This is the "natural" mapping; read as an arrow =>
+from1: to1
+from2: to2
