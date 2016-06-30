@@ -25,7 +25,9 @@ recode_read <- function(filename, recipes=NULL) {
   recipes <- recode_read_recipes(filename, recipes)
   get_recipe <- function(name) {
     if (name %in% names(recipes)) {
-      recipes[[name]]
+      ret <- recipes[[name]]
+      class(ret) <- "recipe"
+      ret
     } else {
       stop(sprintf("Recipe %s not found", name))
     }
@@ -52,6 +54,28 @@ recode_validate1 <- function(x) {
   if (is.character(x)) {
     x <- setNames(rep(list(NULL), length(x)), x)
   } else if (is.list(x)) {
+    ## Need to catch something here with recipes, which can end up
+    ## badly spliced.
+    is_recipe <- vapply(x, inherits, logical(1), "recipe")
+    if (any(is_recipe)) {
+      ## There's a nasty bit of expansion needed here that is probably
+      ## incorrect a lot of the time, and might be in the case of
+      ## rules that are a character vector?
+      ret <- vector("list", length(x) - sum(is_recipe) +
+                            sum(lengths(x[is_recipe])))
+      j <- 1L
+      for (i in seq_along(x)) {
+        if (is_recipe[[i]]) {
+          k <- length(x[[i]])
+          ret[seq.int(j, length.out=k)] <- unclass(x[[i]])
+          j <- j + k
+        } else {
+          ret[j] <- x[i]
+          j <- j + 1L
+        }
+      }
+      x <- ret
+    }
     if (is.null(names(x))) {
       x <- from_yaml_ordered_map(x)
       assert_named(x)

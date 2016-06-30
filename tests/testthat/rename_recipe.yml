@@ -1,0 +1,15 @@
+- new:
+    - from: old
+    - !recipe process
+
+# This is the non-recipe version; it should be the same in the rules
+# once read in.
+- equiv:
+    - from: old
+    - as.numeric:
+    - sqrt:
+
+# This version is the non-renaming recipe version.  We'll run it last
+# because it modifies in place.  Once this runs, everything will be
+# the same.
+- old: !recipe process
