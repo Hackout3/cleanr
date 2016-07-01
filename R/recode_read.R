@@ -1,4 +1,26 @@
-## Read the recoding yaml.
+##' Read recoding rules from a yaml file.
+##' @title Read recoding rules
+##' @param filename Filename to use
+##'
+##' @param recipes Optional filename for recipes.  If omitted and a
+##'   file `recipes.yml` is found, that will be used.
+##'
+##' @export
+recode_read <- function(filename, recipes=NULL) {
+  recipes <- recode_read_recipes(filename, recipes)
+  get_recipe <- function(name) {
+    if (name %in% names(recipes)) {
+      ret <- recipes[[name]]
+      class(ret) <- "recipe"
+      ret
+    } else {
+      stop(sprintf("Recipe %s not found", name))
+    }
+  }
+
+  dat <- yaml_read(filename, "recipe" = get_recipe)
+  recode_validate(dat)
+}
 
 recode_read_recipes <- function(filename, recipes=NULL) {
   recipes_default <- file.path(dirname(filename), "recipes.yml")
@@ -19,22 +41,6 @@ recode_read_recipes <- function(filename, recipes=NULL) {
 recode_validate_recipes <- function(dat) {
   assert_named(dat)
   lapply(dat, recode_validate1)
-}
-
-recode_read <- function(filename, recipes=NULL) {
-  recipes <- recode_read_recipes(filename, recipes)
-  get_recipe <- function(name) {
-    if (name %in% names(recipes)) {
-      ret <- recipes[[name]]
-      class(ret) <- "recipe"
-      ret
-    } else {
-      stop(sprintf("Recipe %s not found", name))
-    }
-  }
-
-  dat <- yaml_read(filename, "recipe" = get_recipe)
-  recode_validate(dat)
 }
 
 recode_validate <- function(dat) {
