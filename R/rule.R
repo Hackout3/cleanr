@@ -1,10 +1,9 @@
+#' Throws an error if the data does not confirm to the rule set.
+#'
 #' @title Validate data given a rule set
-#'
-#' Throws an error if the data does not confirm to the rule set
-#'
 #' @param data The data to validate
 #' @param rules List of rules
-#' @param rule_file Optional: the yaml file containing the rules
+#' @param rules_file Optional: the yaml file containing the rules
 #' @export
 rule_validation <- function( data, rules_file = NULL, rules = NULL )
 {

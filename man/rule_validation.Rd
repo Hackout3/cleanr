@@ -2,17 +2,18 @@
 % Please edit documentation in R/rule.R
 \name{rule_validation}
 \alias{rule_validation}
-\title{Validate data given a rule set
-
-Throws an error if the data does not confirm to the rule set}
+\title{Validate data given a rule set}
 \usage{
 rule_validation(data, rules_file = NULL, rules = NULL)
 }
 \arguments{
 \item{data}{The data to validate}
 
-\item{rules}{List of rules}
+\item{rules_file}{Optional: the yaml file containing the rules}
 
-\item{rule_file}{Optional: the yaml file containing the rules}
+\item{rules}{List of rules}
+}
+\description{
+Throws an error if the data does not confirm to the rule set.
 }
 
