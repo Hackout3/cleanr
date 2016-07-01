@@ -3,6 +3,8 @@
 ## TODO: this would be nice if table could also be a filename.  If it
 ## is, then make it be a yml file that contains just "Bad: Good"
 ## matches, in the style of a normal yaml hash.
+
+##' @importFrom stats na.omit setNames
 recode_character <- function(x, table, unmatched_action="missing") {
   if (possible_filename(table) && file.exists(table)) {
     table <- yaml_read(table)
@@ -101,7 +103,7 @@ recode_character_fuzzy <- function(x, table_filename,
 
   if (any(matched)) {
     f <- function(x) {
-      tmp[[x]][order(drop(adist(tmp[[x]], x)), decreasing=TRUE)]
+      tmp[[x]][order(drop(utils::adist(tmp[[x]], x)), decreasing=TRUE)]
     }
     tmp <- setNames(split(xx[matched], unlist(i[matched])),
                     valid[sort(unique(unlist(i[matched])))])
