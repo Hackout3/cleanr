@@ -1,13 +1,17 @@
 Package: cleanr
-Title: What the Package Does (one line, title case)
+Title: Logic Free Data Cleaning
 Version: 0.0.0.9000
-Authors@R: person("First", "Last", email = "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
-Depends:
-    R (>= 3.3.0)
-License: What license is it under?
-Encoding: UTF-8
+Authors@R: c(
+    person("Rich", "FitzJohn", email = "first.last@example.com",
+           role = c("aut", "cre")),
+    person("Anne", "Cori", role = "aut"),
+    person("Edwin", "van Leeuwen", role = "aut"),
+    person("Marc", "Baguelin", role = "aut"))
+Description: Ideas in large scale data cleaning without ending up with a
+    massive pile of messy cleaning code.
+License: MIT + file LICENSE
 LazyData: true
+Depends: R (>= 3.0.0)
 Imports:
     stringr,
     yaml
