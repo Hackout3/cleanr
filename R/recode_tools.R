@@ -5,7 +5,7 @@
 ## matches, in the style of a normal yaml hash.
 
 ##' @importFrom stats na.omit setNames
-recode_character <- function(x, table, unmatched_action="missing") {
+recode_character <- function(x, table, unmatched_action="error") {
   if (possible_filename(table) && file.exists(table)) {
     table <- yaml_read(table)
   }
