@@ -4,18 +4,22 @@
 \alias{rename}
 \title{Rename columns}
 \usage{
-rename(data, table, reverse_direction = NULL)
+rename(data, table, reverse_direction = NULL, allow_missing = FALSE)
 }
 \arguments{
 \item{data}{A data.frame to modify}
 
-\item{table}{A table of \code{from=to} or \code{to=from} mappings}
+\item{table}{A table of \code{from = to} or \code{to = from} mappings}
 
 \item{reverse_direction}{Logical (or NULL) to indicate the
 direction of the mapping.  If \code{TRUE}, then \code{table} is
-treated as a set of \code{to=from} mappings, while if
-\code{FALSE} it is treated as \code{from=to} mappings.  If
+treated as a set of \code{to = from} mappings, while if
+\code{FALSE} it is treated as \code{from = to} mappings.  If
 \code{NULL} the direction is determined automatically.}
+
+\item{allow_missing}{Allow columns to be missing in \code{data}
+(but present \code{table}).  This is not compatible with
+\code{reverse_direction = NULL}.}
 }
 \description{
 Bulk rename a number of columns.  Note that this overlaps

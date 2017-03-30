@@ -5,16 +5,21 @@
 ##'
 ##' @title Rename columns
 ##' @param data A data.frame to modify
-##' @param table A table of \code{from=to} or \code{to=from} mappings
+##' @param table A table of \code{from = to} or \code{to = from} mappings
 ##'
 ##' @param reverse_direction Logical (or NULL) to indicate the
 ##'   direction of the mapping.  If \code{TRUE}, then \code{table} is
-##'   treated as a set of \code{to=from} mappings, while if
-##'   \code{FALSE} it is treated as \code{from=to} mappings.  If
+##'   treated as a set of \code{to = from} mappings, while if
+##'   \code{FALSE} it is treated as \code{from = to} mappings.  If
 ##'   \code{NULL} the direction is determined automatically.
 ##'
+##' @param allow_missing Allow columns to be missing in \code{data}
+##'   (but present \code{table}).  This is not compatible with
+##'   \code{reverse_direction = NULL}.
+##'
 ##' @export
-rename <- function(data, table, reverse_direction=NULL) {
+rename <- function(data, table, reverse_direction = NULL,
+                   allow_missing = FALSE) {
   if (possible_filename(table) && file.exists(table)) {
     table <- yaml_read(table)
   }
@@ -51,17 +56,21 @@ rename <- function(data, table, reverse_direction=NULL) {
 
   if (any(dup_to)) {
     stop("Duplicated destination columns: ",
-         paste(to[dup_to], collapse=", "))
+         paste(to[dup_to], collapse = ", "))
   }
-  i <- match(from, nms)
-  j <- is.na(i)
 
-  if (any(j)) {
-    stop("Source columns not found: ", paste(from[j], collapse=", "))
+  i <- match(from, nms)
+  j <- !is.na(i)
+
+  if (any(!j) && !allow_missing) {
+    stop("Source columns not found: ", paste(from[j], collapse = ", "))
   }
+
+  ## This is awful indexing.  It is tested though but it's really
+  ## unpleasant.  There is probably a nicer way of doing this.
   if (any(dup_from)) {
-    data[to[dup_from]] <- data[i[dup_from]]
+    data[to[dup_from]] <- data[i[dup_from][j[dup_from]]]
   }
-  names(data)[i[!dup_from]] <- to[!dup_from]
+  names(data)[i[!dup_from][j[!dup_from]]] <- to[!dup_from][j[!dup_from]]
   data
 }
