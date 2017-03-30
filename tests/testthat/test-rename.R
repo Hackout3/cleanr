@@ -39,6 +39,10 @@ test_that("duplicates", {
 test_that("missing", {
   d1 <- data.frame(from1 = 1:10, from2 = runif(10))
   d2 <- data.frame(from1 = 1:10)
+
+  expect_error(rename(d2, "rename_table.yml", FALSE),
+               "Source columns not found: from2")
+
   expect_equal(rename(d1, "rename_table.yml", FALSE, TRUE),
                setNames(d1, c("to1", "to2")))
   expect_equal(rename(d1, "rename_table.yml", TRUE, TRUE),

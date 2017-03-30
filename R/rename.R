@@ -63,7 +63,7 @@ rename <- function(data, table, reverse_direction = NULL,
   j <- !is.na(i)
 
   if (any(!j) && !allow_missing) {
-    stop("Source columns not found: ", paste(from[j], collapse = ", "))
+    stop("Source columns not found: ", paste(from[!j], collapse = ", "))
   }
 
   ## This is awful indexing.  It is tested though but it's really
